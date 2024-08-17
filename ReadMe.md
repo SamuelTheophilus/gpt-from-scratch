@@ -8,7 +8,6 @@ This project aims to build a Language Model (LLM) from scratch, focusing on crea
 - `data/`: Directory containing datasets used for training and evaluation.
 - `models/`: Directory where model checkpoints and configurations are saved.
 - `src/`: Core codebase containing the implementation of the transformer model, data loaders, and training scripts.
-- `notebooks/`: Jupyter notebooks used for experimentation, visualization, and analysis.
 - `scripts/`: Utility scripts for data processing, model evaluation, and other tasks.
 - `README.md`: This document.
 
