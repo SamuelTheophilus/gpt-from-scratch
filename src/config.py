@@ -9,8 +9,8 @@ def fetch_training_hyperparams():
 
     :return:
         training_epochs: number of training epochs
-        learning_rate: learning rate
         evaluation_epochs: number of evaluation epochs
+        learning_rate: learning rate
     """
     training_epochs = os.getenv("TRAINING_EPOCHS")
     evaluation_epochs = os.getenv("EVALUATION_EPOCHS")

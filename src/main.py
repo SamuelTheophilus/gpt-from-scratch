@@ -39,30 +39,19 @@ def get_batch(data_type: str) -> (torch.tensor, torch.tensor):
     return xb, yb
 
 
-@torch.no_grad()
-def estimate_loss():
-    output = {}
-    model.eval()
-    for split in ["train", "val"]:
-        losses = torch.zeros(EVAL_EPOCHS)
-        for eval_step in range(EVAL_EPOCHS):
-            xb, yb = get_batch(split)
-            _, loss = model(xb, yb)
-            losses[eval_step] = loss.item()
-        output[split] = losses.mean()
-    model.train()
-    return output
-
-
 class BigramLanguageModel(nn.Module):
-    def __init__(self, vocab_size, embedding_size) -> None:
+    def __init__(self, vocab_size: int, context_length: int,  embedding_size: int) -> None:
         super().__init__()
         self.token_embedding_table = nn.Embedding(vocab_size, embedding_size)
+        self.position_embedding_table = nn.Embedding(context_length, embedding_size)
         self.fc = nn.Linear(embedding_size, vocab_size)
 
     def forward(self, idx, targets=None):
-        logits = self.token_embedding_table(idx)
-        logits = self.fc(logits)
+        B, T = idx.shape    # T represents the context_length to be passed into the position_embedding_table
+        token_embed = self.token_embedding_table(idx)   # shape: (B, T, C)
+        position_embed = self.position_embedding_table(torch.arange(T, device=DEVICE))  # shape: (T, C)
+        inputs = position_embed + token_embed   # shape: (B, T, C)  = position_embed (T, C) + token_embed (B, T, C) broadcasting of the B dimension.
+        logits = self.fc(inputs)    # shape B, T, vocab_size
 
         if targets is None:
             loss = None
@@ -84,26 +73,4 @@ class BigramLanguageModel(nn.Module):
         return idx
 
 
-model = BigramLanguageModel(vocab_size=data_vocab_size, embedding_size=EMBEDDING_LENGTH)
-model = model.to(device=DEVICE)
 
-
-# Optimizer
-optimizer = torch.optim.AdamW(params=model.parameters(), lr=LEARNING_RATE)
-
-
-# Training Loop
-for step in range(TRAIN_EPOCHS):
-    if step % 200 == 0:
-        output = estimate_loss()
-        print(f"Training Loss:: {output['train']:.4f}\nValidation Loss::{output['val']:.4f}\n===================\n")
-    xb, yb = get_batch("train")
-    _, loss = model(xb, yb)
-    optimizer.zero_grad(set_to_none=True)
-    loss.backward()
-    optimizer.step()
-
-eg_idx = torch.zeros((1, 1), dtype=torch.long, device=DEVICE)
-generated_tokens = model.generate(eg_idx, max_new_tokens=100)[0].tolist()
-generated_text = decode(generated_tokens)
-print(f"Generated Text after training::\n{generated_text}")
