@@ -38,11 +38,14 @@ def fetch_model_params():
         embeddings_length
         dropout rate
         batch_size
+        n_decoder_block
+        n_attention_heads
     """
     context_length = os.getenv("CONTEXT_LENGTH")
     embeddings_length = os.getenv("N_EMBEDDINGS")
-
     dropout_rate = os.getenv("DROPOUT_RATE")
     batch_size = os.getenv("BATCH_SIZE")
-    return int(context_length), int(embeddings_length), float(dropout_rate), int(batch_size)
+    n_decoder_blocks = os.getenv("N_DECODER_BLOCKS")
+    n_attention_heads = os.getenv("NUM_HEADS")
+    return int(context_length), int(embeddings_length), float(dropout_rate), int(batch_size), int(n_decoder_blocks), int(n_attention_heads)
 

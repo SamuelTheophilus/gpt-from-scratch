@@ -3,14 +3,14 @@ from typing import Dict
 import torch
 import torch.nn as nn
 
-from config import fetch_training_hyperparams, fetch_model_params, fetch_device
 from components import Model
-from main import get_batch, decode
+from data_prep import VOCAB_SIZE, get_batch, decode, itos
+from config import fetch_training_hyperparams, fetch_model_params, fetch_device
 
 TRAIN_EPOCHS, EVAL_EPOCHS, LEARNING_RATE = fetch_training_hyperparams()
 DEVICE = fetch_device()
-CONTEXT_LENGTH, N_EMBED, DROPOUT_RATE, BATCH_SIZE = fetch_model_params()
-model = Model(vocab_size=65, context_length=CONTEXT_LENGTH, embedding_size=N_EMBED).to(DEVICE)
+CONTEXT_LENGTH, N_EMBED, DROPOUT_RATE, BATCH_SIZE, _, _ = fetch_model_params()
+model = Model(vocab_size=VOCAB_SIZE, context_length=CONTEXT_LENGTH, embedding_size=N_EMBED).to(DEVICE)
 optimizer = torch.optim.AdamW(params=model.parameters(), lr=LEARNING_RATE)
 
 
@@ -42,7 +42,7 @@ def train(training_model: nn.Module, epochs: int, eval_interval: int = 200) -> N
 def generate_text(_model: nn.Module) -> str:
     eg_idx = torch.zeros((1, 1), dtype=torch.long, device=DEVICE)
     generated_tokens = _model.generate(eg_idx, max_new_tokens=100)[0].tolist()
-    generated_text = decode(generated_tokens)
+    generated_text = decode(generated_tokens, itos)
     return f"Generated Text after training::\n{generated_text}"
 
 

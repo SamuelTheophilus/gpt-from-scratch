@@ -4,7 +4,7 @@ from torch.nn import functional as F
 
 from config import fetch_model_params, fetch_device
 DEVICE = fetch_device()
-CONTEXT_LENGTH, N_EMBED, DROPOUT_RATE, _ = fetch_model_params()
+CONTEXT_LENGTH, N_EMBED, DROPOUT_RATE, _, NUM_HEADS, NUM_BLOCKS = fetch_model_params()
 
 
 class Head(nn.Module):
@@ -84,7 +84,7 @@ class Model(nn.Module):
         super().__init__()
         self.token_embedding_table = nn.Embedding(vocab_size, embedding_size)
         self.position_embedding_table = nn.Embedding(context_length, embedding_size)
-        self.blocks = nn.Sequential(*[Block(embedding_size, 4) for _ in range(6)])      # Todo: Replace 4 and 6 with appropriate variables.
+        self.blocks = nn.Sequential(*[Block(embedding_size, NUM_HEADS) for _ in range(NUM_BLOCKS)])
         self.layer_norm = nn.LayerNorm(embedding_size)
         self.fc = nn.Linear(embedding_size, vocab_size)
 
