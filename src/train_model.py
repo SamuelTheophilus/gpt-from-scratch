@@ -1,3 +1,4 @@
+import datetime
 from typing import Dict
 
 import torch
@@ -10,7 +11,8 @@ from config import fetch_training_hyperparams, fetch_model_params, fetch_device
 TRAIN_EPOCHS, EVAL_EPOCHS, LEARNING_RATE = fetch_training_hyperparams()
 DEVICE = fetch_device()
 CONTEXT_LENGTH, N_EMBED, DROPOUT_RATE, BATCH_SIZE, _, _ = fetch_model_params()
-model = Model(vocab_size=VOCAB_SIZE, context_length=CONTEXT_LENGTH, embedding_size=N_EMBED).to(DEVICE)
+model = Model(vocab_size=VOCAB_SIZE, context_length=CONTEXT_LENGTH,
+              embedding_size=N_EMBED).to(DEVICE)
 optimizer = torch.optim.AdamW(params=model.parameters(), lr=LEARNING_RATE)
 
 
@@ -31,7 +33,8 @@ def train(training_model: nn.Module, epochs: int, eval_interval: int = 200) -> N
     for step in range(epochs):
         if step % eval_interval == 0:
             output = estimate_loss()
-            print(f"Training Loss:: {output['train']:.4f}\nValidation Loss::{output['val']:.4f}\n===================\n")
+            print(f"Training Loss:: {output['train']:.4f}\nValidation Loss::{
+                  output['val']:.4f}\n===================\n")
         xb, yb = get_batch("train")
         _, loss = training_model(xb, yb)
         optimizer.zero_grad(set_to_none=True)
@@ -46,6 +49,23 @@ def generate_text(_model: nn.Module) -> str:
     return f"Generated Text after training::\n{generated_text}"
 
 
+def save_model_checkpoint(model: nn.Module, path: str) -> None:
+    torch.save(model.state_dict(), path)
+    return None
+
+
+def load_model_checkpoint(path: str) -> nn.Module:
+    new_model = Model(vocab_size=VOCAB_SIZE,
+                      context_length=CONTEXT_LENGTH, embedding_size=N_EMBED)
+    new_model.load_state_dict(torch.load(path), weights_only=True)
+    new_model.eval()  # Setting the loaded model to evaluation mode
+    return new_model
+
+
 train(training_model=model, epochs=TRAIN_EPOCHS)
+save_model_checkpoint(
+    model=model, path=f"../models/saved_model/{datetime.datetime.now()}")
 print(generate_text(_model=model))
 
+
+# Todo: Add snippet to save model after training.
