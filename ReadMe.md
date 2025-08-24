@@ -39,6 +39,5 @@ This section lists the key resources, papers, and articles that were instrumenta
 - [Attention Is All You Need](https://arxiv.org/abs/1706.03762)
 - [The Illustrated Transformer](http://jalammar.github.io/illustrated-transformer/)
 
-## Contributing
-Contributions are welcome! Please feel free to submit a Pull Request or open an issue.
+
 
